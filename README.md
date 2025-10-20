@@ -128,28 +128,9 @@ The following maps the project files to evaluation criteria in your assignment:
 ## Logging recommendation
 - Add a structured logger (pino or winston). Example: replace console.log with pino and capture traces for reconnects, LLM errors, and ES failures.
 
-## Security & Secrets
-- Do not commit `.env` or credentials. Use secrets manager for production (AWS Secrets Manager, Azure Key Vault, or GitHub Secrets for CI).
 
-## Pushing to a Private GitHub Repository
-1. Create a private repo on GitHub.
-2. Push your local project:
 
-```powershell
-git init
-git add .
-git commit -m "Initial OneBox prototype"
-git remote add origin git@github.com:YOUR_USERNAME/REPO_NAME.git
-git branch -M main
-git push -u origin main
-```
 
-## Recommended next steps (prioritized)
-1. Add structured logging (pino) and centralized logs.
-2. Add unit and integration tests (mock IMAP & ES). Use `supertest` for server endpoints.
-3. Implement a background worker (BullMQ) for AI classification and RAG generation to add resiliency.
-4. Harden security and deploy to an environment with managed ES/Qdrant and secret management.
 
----
 
-If you'd like, I can create `README_RESOURCES.md` with direct links to the external docs you provided and wire up a GitHub Actions workflow to run `npm test` and `npx tsc --noEmit` on push. Do you want me to add those now?#
+
