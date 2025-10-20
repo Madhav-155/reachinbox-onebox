@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OneBox - Email Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .email { border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .tag { display:inline-block; padding:4px 8px; border-radius:4px; background:#eee; margin-left:8px; }
+    .Interested { background: #d1ffd6; }
+    .Spam { background: #ffd6d6; }
+  </style>
+</head>
+<body>
+  <h1>OneBox - Email Demo</h1>
+  <div>
+    <label>Account: <select id="accounts"><option value="">(all)</option></select></label>
+    <label>Folder: <select id="folders"><option value="">(all)</option><option>INBOX</option><option>Sent</option></select></label>
+    <label>Search: <input id="q" /></label>
+    <button id="search">Search</button>
+  </div>
+  <div id="results"></div>
+  <script>
+    async function loadAccounts() {
+      const r = await fetch('/api/accounts');
+      const accounts = await r.json();
+      const sel = document.getElementById('accounts');
+      if (!sel) return;
+      accounts.forEach(a => {
+        const o = document.createElement('option');
+        o.value = a.id;
+        o.textContent = a.user;
+        sel.appendChild(o);
+      });
+    }
+
+    async function search() {
+      const qEl = document.getElementById('q');
+      const accountsEl = document.getElementById('accounts');
+      const foldersEl = document.getElementById('folders');
+      const container = document.getElementById('results');
+      if (!container) return;
+  const q = (qEl && qEl instanceof HTMLInputElement) ? qEl.value : '';
+  const account = (accountsEl && accountsEl instanceof HTMLSelectElement) ? accountsEl.value : '';
+  const folder = (foldersEl && foldersEl instanceof HTMLSelectElement) ? foldersEl.value : '';
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (account) params.set('accountId', account);
+      if (folder) params.set('folder', folder);
+      const r = await fetch('/api/emails/search?' + params.toString());
+      const data = await r.json();
+      container.innerHTML = '';
+      (data.hits || []).forEach(e => {
+        const d = document.createElement('div');
+        d.className = 'email';
+
+        const title = document.createElement('strong');
+        title.textContent = e.subject || '(no subject)';
+        d.appendChild(title);
+
+        const tag = document.createElement('span');
+        tag.className = 'tag ' + (e.aiCategory || '');
+        tag.textContent = e.aiCategory || 'Uncategorized';
+        d.appendChild(tag);
+
+        const meta = document.createElement('div');
+        meta.textContent = `${e.from || ''} • ${e.date ? new Date(e.date).toLocaleString() : ''}`;
+        d.appendChild(meta);
+
+        const bodyDiv = document.createElement('div');
+        bodyDiv.textContent = (e.body || '').substring(0, 300);
+        d.appendChild(bodyDiv);
+
+        container.appendChild(d);
+      });
+    }
+
+    const searchBtn = document.getElementById('search');
+    if (searchBtn) searchBtn.addEventListener('click', search);
+    loadAccounts();
+  </script>
+</body>
+</html>
